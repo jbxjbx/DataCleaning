@@ -12,3 +12,4 @@ The main steps in the script, run_analysis.R, include :
 7.Replaces the abbrivations with the full name in column names of the data set.
 8.Groups the data set by activity and subject, takes the average of each variable for each activity and each subject, and saves the results in a tidy data set.
 9.Outputs the tidy data set to a txt file.
+
