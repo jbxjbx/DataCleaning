@@ -2,7 +2,7 @@
 ### Getting and Cleaning Data
 ### Final Project
 
-# download and unzip the file
+# at the beginning we download and unzip the data file
 filename <- "getdata_dataset.zip"
 if (!file.exists(filename)){
      fileURL <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
