@@ -1,55 +1,49 @@
-### 
 ### This R script was created for the Coursera course Getting and Cleaning Data project
-### The Coursera objective sections are noted in the code below
-#####
+### Getting and Cleaning Data
+### Final Project
 
-# first we create the file library
-library(data.table)
-library(dplyr)
-setwd("~/mooc-r/UCI_Dataset")
-#and then we import data set and read the train data fileone by one 
-xtest <- read.table("test/X_test.txt")
-ytest <- read.table("test/y_test.txt")
-xtrain <- read.table("train/X_train.txt")
-ytrain <- read.table("train/y_train.txt")
-col_names <- read.table("features.txt")
-test_participant <- read.table("test/subject_test.txt")
-train_participant <- read.table("train/subject_train.txt")
-#add column names to datasets
-colnames(xtest) <- t(col_names[2])
-colnames(xtrain) <- t(col_names[2])
-#add participant data as new first column called "participant"
-xtest$participant <-test_participant[,1]
-xtrain$participant <-train_participant[,1]
-#add activity data as new column called "activity"
-xtest$activity <-ytest[,1]
-xtrain$activity <-ytrain[,1]
-#combine the datasets and remove duplicate column
-merged <- rbind(xtrain, xtest)
-duplicated(colnames(merged))
-merged <- merged[, !duplicated(colnames(merged))]
-# first we calculate the extract means and standard deviations
-Mean <- grep("mean()", names(merged), value = FALSE, fixed = TRUE)
-Mean <- append(Mean, 471:477)
-InstrumentMeanMatrix <- merged[Mean]
-STD <- grep("std()", names(merged), value = FALSE)
-InstrumentSTDMatrix <- merged[STD]
-#Replace the activity codes with meaningful terms
-merged$activities <- as.character(merged$activities)
-merged$activities[merged$activities == 1] <- "Walking"
-merged$activities[merged$activities == 2] <- "Walking Upstairs"
-merged$activities[merged$activities == 3] <- "Walking Downstairs"
-merged$activities[merged$activities == 4] <- "Sitting"
-merged$activities[merged$activities == 5] <- "Standing"
-merged$activities[merged$activities == 6] <- "Laying"
-merged$activities <- as.factor(merged$activities)
-#add descriptive variable names by replacing abbreviations with human-readable terms
-names(merged) <- gsub("Acc", "Accelerator", names(merged))
-names(merged) <- gsub("Mag", "Magnitude", names(merged))
-names(merged) <- gsub("Gyro", "Gyroscope", names(merged))
-names(merged) <- gsub("^t", "time", names(merged))
-names(merged) <- gsub("^f", "frequency", names(merged))
-#create tidy dataset
-merged.dt <- data.table(merged)
-TidyData <- merged.dt[, lapply(.SD, mean), by = 'participant']
-write.table(TidyData, file = "CleaningData", row.names = FALSE)
+# download and unzip the file
+filename <- "getdata_dataset.zip"
+if (!file.exists(filename)){
+     fileURL <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
+     download.file(fileURL, filename, method="curl")
+}  
+if (!file.exists("UCI HAR Dataset")) { 
+     unzip(filename) 
+}
+# first we Load activity labels and features
+activityLabels <- read.table("UCI HAR Dataset/activity_labels.txt")
+activityLabels[,2] <- as.character(activityLabels[,2])
+features <- read.table("UCI HAR Dataset/features.txt")
+features[,2] <- as.character(features[,2])
+
+# and then we extract only the data on mean and standard deviation
+featuresWanted <- grep(".*mean.*|.*std.*", features[,2])
+featuresWanted.names <- features[featuresWanted,2]
+featuresWanted.names = gsub('-mean', 'Mean', featuresWanted.names)
+featuresWanted.names = gsub('-std', 'Std', featuresWanted.names)
+featuresWanted.names <- gsub('[-()]', '', featuresWanted.names)
+
+# then we import the datasets
+train <- read.table("UCI HAR Dataset/train/X_train.txt")[featuresWanted]
+trainActivities <- read.table("UCI HAR Dataset/train/Y_train.txt")
+trainSubjects <- read.table("UCI HAR Dataset/train/subject_train.txt")
+train <- cbind(trainSubjects, trainActivities, train)
+
+test <- read.table("UCI HAR Dataset/test/X_test.txt")[featuresWanted]
+testActivities <- read.table("UCI HAR Dataset/test/Y_test.txt")
+testSubjects <- read.table("UCI HAR Dataset/test/subject_test.txt")
+test <- cbind(testSubjects, testActivities, test)
+
+# merge datasets and add labels
+allData <- rbind(train, test)
+colnames(allData) <- c("subject", "activity", featuresWanted.names)
+
+# transform activities & subjects into factors
+allData$activity <- factor(allData$activity, levels = activityLabels[,1], labels = activityLabels[,2])
+allData$subject <- as.factor(allData$subject)
+allData.melted <- melt(allData, id = c("subject", "activity"))
+allData.mean <- dcast(allData.melted, subject + activity ~ variable, mean)
+
+#save the data in tidy.txt
+write.table(allData.mean, "CleanData", row.names = FALSE, quote = FALSE)
