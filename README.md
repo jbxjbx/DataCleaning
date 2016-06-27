@@ -3,12 +3,12 @@ The purpose of this project is to prepare tidy data from the given dataset that 
 
 The main steps in the script, run_analysis.R, include :
 
-Loads the training and the test sets from text files
-Loads the feature set and renames the colum
-Loads and adds subject and activity column to both training and test sets
-Merges the training and the test sets to create one data set using rbind.
-Extracts only the measurements on the mean and standard deviation for each measurement.
-Uses the full activity names to name the activities in the data set
-Replaces the abbrivations with the full name in column names of the data set.
-Groups the data set by activity and subject, takes the average of each variable for each activity and each subject, and saves the results in a tidy data set.
-Outputs the tidy data set to a txt file.
+1.Loads the training and the test sets from text files
+2.Loads the feature set and renames the colum
+3.Loads and adds subject and activity column to both training and test sets
+4.Merges the training and the test sets to create one data set using rbind.
+5.Extracts only the measurements on the mean and standard deviation for each measurement.
+6.Uses the full activity names to name the activities in the data set
+7.Replaces the abbrivations with the full name in column names of the data set.
+8.Groups the data set by activity and subject, takes the average of each variable for each activity and each subject, and saves the results in a tidy data set.
+9.Outputs the tidy data set to a txt file.
